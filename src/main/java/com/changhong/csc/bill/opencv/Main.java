@@ -30,10 +30,10 @@ public class Main {
 	private static void m1() {
 		try {
 			//String path = "http://10.4.68.7:9999/group1/M00/00/52/CgREB1ggHXGAegoJAAGtkX17jZE290.png";
-			String path = "D:/image/test.jpg";
+			String path = "D:/image/test3.jpg";
 			OpenCVLib lib = new OpenCVLib();
 			System.out.println("OenCVLib初始化。。。");
-			ArrayList<RotatedRect> info = lib.getInfo(path);
+			ArrayList<RectModel> info = lib.getInfo(path);
 			System.out.println(info);
 			//display the rectangle
 			ArrayList<BufferedImage> imageList = lib.cut(path, info);

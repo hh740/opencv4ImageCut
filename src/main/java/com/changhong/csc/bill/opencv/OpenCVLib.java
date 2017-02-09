@@ -41,25 +41,26 @@ public class OpenCVLib {
 	 * 
 	 * @see com.changhong.csc.bill.RectModel
 	 */
-	public ArrayList<RotatedRect> getInfo(String path) {
+	public ArrayList<RectModel> getInfo(String path) {
 		loadImage(path);
 		ArrayList<RotatedRect> rectList = cutAndDeskewImage();
-//		if(rectList == null) {
-//			return null;
-//		}
-//		ArrayList<RectModel> resultList = new ArrayList<RectModel>(rectList.size()); //封装矩形的信息
-//		for(RotatedRect rect : rectList) {
-//			RectModel model = new RectModel();
-//			model.setWidth(rect.size.width);
-//			model.setHeight(rect.size.height);
-//			model.setRotation(rect.angle);
-//			Point topLeftPoint = getTopLeftPoint(rect);
-//			model.setX(topLeftPoint.x);
-//			model.setY(topLeftPoint.y);
-//			model.setRotatedRect(rect);
-//			resultList.add(model);
-//		}
-		return rectList;
+		if(rectList == null) {
+			return null;
+		}
+		ArrayList<RectModel> resultList = new ArrayList<RectModel>(rectList.size()); //封装矩形的信息
+		for(RotatedRect rect : rectList) {
+			RectModel model = new RectModel();
+			model.setWidth(rect.size.width);
+			model.setHeight(rect.size.height);
+			model.setRotation(rect.angle);
+			Point[] pts = new Point[4];
+			rect.points(pts);
+			model.setX(pts[1].x);
+			model.setY(pts[1].y);
+			model.setRotatedRect(rect);
+			resultList.add(model);
+		}
+		return resultList;
 	}
 	
 	/**
@@ -70,7 +71,7 @@ public class OpenCVLib {
 	 * 
 	 * @see com.changhong.csc.bill.RectModel
 	 */
-	public ArrayList<BufferedImage> cut(String path, ArrayList<RotatedRect> rectList) {
+	public ArrayList<BufferedImage> cut(String path, ArrayList<RectModel> rectList) {
 		if(rectList == null || rectList.size() == 0) {
 			return null;
 		}

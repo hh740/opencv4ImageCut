@@ -129,20 +129,20 @@ public class CutImageForLib {
 		}
 		
 		//draw the resultContours
-		Mat cloneM1 = m.clone();
-		Imgproc.drawContours(cloneM1, resultContours, -1, new Scalar(255,255,255));
-		BufferedImage image1 = (BufferedImage) ImageUtil.toBufferedImage(cloneM1);	
-		// save the image
-		name = "resultcontours.jpg";
-		File file1 = new File(path,name);
-		try{
-			if(!file1.exists()){
-				file1.createNewFile();
-			}
-			ImageIO.write(image1, "jpg", file1);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+//		Mat cloneM1 = m.clone();
+//		Imgproc.drawContours(cloneM1, resultContours, -1, new Scalar(255,255,255));
+//		BufferedImage image1 = (BufferedImage) ImageUtil.toBufferedImage(cloneM1);	
+//		// save the image
+//		name = "resultcontours.jpg";
+//		File file1 = new File(path,name);
+//		try{
+//			if(!file1.exists()){
+//				file1.createNewFile();
+//			}
+//			ImageIO.write(image1, "jpg", file1);
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
 		MatOfPoint cont1, cont2;
 		for (int i = 0; i < resultContours.size(); i++) {
 			cont1 = resultContours.get(i);
@@ -163,20 +163,20 @@ public class CutImageForLib {
 			}
 		}
 		//draw the finalContours
-				Mat cloneM2 = m.clone();
-				Imgproc.drawContours(cloneM2, resultContours, -1, new Scalar(255,255,255));
-				BufferedImage image3 = (BufferedImage) ImageUtil.toBufferedImage(cloneM2);	
-				// save the image
-				name = "finalcontours.jpg";
-				File file3 = new File(path,name);
-				try{
-					if(!file3.exists()){
-						file3.createNewFile();
-					}
-					ImageIO.write(image3, "jpg", file3);
-				}catch(Exception e){
-					e.printStackTrace();
-				}
+//				Mat cloneM2 = m.clone();
+//				Imgproc.drawContours(cloneM2, resultContours, -1, new Scalar(255,255,255));
+//				BufferedImage image3 = (BufferedImage) ImageUtil.toBufferedImage(cloneM2);	
+//				// save the image
+//				name = "finalcontours.jpg";
+//				File file3 = new File(path,name);
+//				try{
+//					if(!file3.exists()){
+//						file3.createNewFile();
+//					}
+//					ImageIO.write(image3, "jpg", file3);
+//				}catch(Exception e){
+//					e.printStackTrace();
+//				}
 		ArrayList<RotatedRect> rectList = new ArrayList<RotatedRect>();
 		if(resultContours.size() != 0){
 			for (int i = 0; i < resultContours.size(); i++) {
@@ -204,7 +204,7 @@ public class CutImageForLib {
 		return rectList;
 	}
 	
-	public ArrayList<BufferedImage> cutImages(Mat m, ArrayList<RotatedRect> rectList) {
+	public ArrayList<BufferedImage> cutImages(Mat m, ArrayList<RectModel> rectList) {
 		//删除以前导出的图片文件
 //		deleteOldOutputImages();
 		
@@ -224,11 +224,11 @@ public class CutImageForLib {
 		
 		ArrayList<BufferedImage> imageList = new ArrayList<BufferedImage>(0);
 		for(int i = 0, len = rectList.size(); i < len; i++) {
-			RotatedRect rectModel = rectList.get(i);
-			double w = rectModel.size.width;
-			double h = rectModel.size.height;
+			RectModel rectModel = rectList.get(i);
+			double w = rectModel.getWidth();
+			double h = rectModel.getHeight();
 			Point pts[] = new Point[4];
-			rectModel.points(pts);
+			rectModel.getRotatedRect().points(pts);
 			Mat result = new Mat();
 		    MatOfPoint2f src = new MatOfPoint2f();
 		    src.fromArray(pts[0],pts[1],pts[2]);
