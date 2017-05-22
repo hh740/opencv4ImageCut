@@ -2,14 +2,10 @@ package com.changhong.csc.bill.opencv;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-
-import org.opencv.core.RotatedRect;
-import org.opencv.imgproc.Imgproc;
 
 /**
  * OpenCV测试代码，用于测试OpenCV环境是否配置好<br>
@@ -30,7 +26,8 @@ public class Main {
 	private static void m1() {
 		try {
 			//String path = "http://10.4.68.7:9999/group1/M00/00/52/CgREB1ggHXGAegoJAAGtkX17jZE290.png";
-			String path = "D:/image/test3.jpg";
+			String path = "D:\\image\\test.jpg";
+//			String path = "C:/Users/hasee/Desktop/xml格式定义/可用测试票据/ZZSPTFP2.jpg";
 			OpenCVLib lib = new OpenCVLib();
 			System.out.println("OenCVLib初始化。。。");
 			ArrayList<RectModel> info = lib.getInfo(path);
@@ -42,7 +39,7 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.err.println("成功。。。");
+		System.out.println("成功。。。");
 	}
 	
 	

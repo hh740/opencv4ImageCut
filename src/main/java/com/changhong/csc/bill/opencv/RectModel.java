@@ -9,7 +9,6 @@ public class RectModel {
 	private double height = 0d;
 	private double rotation = 0d;
 	private double rightAngel = 0d;
-	private RotatedRect rotatedRect;
 	
 	public RectModel() {}
 	
@@ -91,11 +90,4 @@ public class RectModel {
         	    append("}").toString();
 	}
 
-	public RotatedRect getRotatedRect() {
-		return rotatedRect;
-	}
-
-	public void setRotatedRect(RotatedRect rotatedRect) {
-		this.rotatedRect = rotatedRect;
-	}
 }
