@@ -49,10 +49,10 @@ public class CutImageForLib {
 		Mat imageCny = new Mat();
 		Mat hierarchy = new Mat();
 		
-		Mat cloneM = m.clone();
-		
+		Mat cloneM = new Mat();
+		cloneM = m.clone();
 		//去噪
-		Imgproc.bilateralFilter(cloneM, imageGray, 5, 50, 50);	//双边滤波  第三个参数过大导致计算慢，一般图片噪声不大可适当调低
+		Imgproc.bilateralFilter(cloneM, imageGray, 5, 20, 20);	//双边滤波  第三个参数过大导致计算慢，一般图片噪声不大可适当调低
 		Imgproc.medianBlur(imageGray, imageGray, 5);			//中值滤波平滑
 		
 //		//强化边缘
@@ -81,17 +81,17 @@ public class CutImageForLib {
 		Imgproc.drawContours(cloneM, contours, -1, new Scalar(255,255,255));
 		BufferedImage image = (BufferedImage) ImageUtil.toBufferedImage(cloneM);	
 		// save the image
-		String path = "d:/image/temp/";
-		String name = "contours.jpg";
-		File file2 = new File(path,name);
-		try{
-			if(!file2.exists()){
-				file2.createNewFile();
-			}
-			ImageIO.write(image, "jpg", file2);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+//		String path = "d:/image/temp/";
+//		String name = "contours.jpg";
+//		File file2 = new File(path,name);
+//		try{
+//			if(!file2.exists()){
+//				file2.createNewFile();
+//			}
+//			ImageIO.write(image, "jpg", file2);
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
 
 		List<MatOfPoint2f> approx = new ArrayList<MatOfPoint2f>();
 
@@ -122,9 +122,9 @@ public class CutImageForLib {
 			
 			resultContours.add(contour);
 
-			System.out.println("myPt: " + myPt.size()
-					+ " Imgproc.contourArea(myPt): "
-					+ Imgproc.contourArea(myPt));
+//			System.out.println("myPt: " + myPt.size()
+//					+ " Imgproc.contourArea(myPt): "
+//					+ Imgproc.contourArea(myPt));
 
 		}
 		
@@ -192,8 +192,8 @@ public class CutImageForLib {
 			}
 		}else{
 			MatOfPoint2f pts = new MatOfPoint2f();
-			pts.fromArray(new Point(0,m.size().height),new Point(0,0),new Point(m.size().width,0), new Point(m.size().height,m.size().width));
-			RotatedRect minAreaRect = Imgproc.minAreaRect(pts); 
+			pts.fromArray(new Point(0,m.size().height), new Point(0,0), new Point(m.size().width,0), new Point(m.size().width,m.size().height));
+//			RotatedRect minAreaRect = Imgproc.minAreaRect(pts); 
 			RotatedRect result = new RotatedRect(new Point(m.size().width/2, m.size().height/2),new Size(m.size().width,m.size().height),0);
 			rectList.add(result);
 			pts.release();
@@ -207,28 +207,29 @@ public class CutImageForLib {
 	public ArrayList<BufferedImage> cutImages(Mat m, ArrayList<RectModel> rectList) {
 		//删除以前导出的图片文件
 //		deleteOldOutputImages();
+//		
+//		if(m.rows() > 5000 || m.cols() > 5000) {//600dpi
+//			dpiType = DPI_600;
+//			charMinSize = 30;
+//			charMaxSize = 180;
+//		} else if(m.rows() > 2500 || m.cols() > 2500) {//300dpi
+//			dpiType = DPI_300;
+//			charMinSize = 15;
+//			charMaxSize = 90;
+//		} else {//<300dpi
+//			dpiType = DPI_LESS_300;
+//			charMinSize = 10;
+//			charMaxSize = 70;
+//		}
 		
-		if(m.rows() > 5000 || m.cols() > 5000) {//600dpi
-			dpiType = DPI_600;
-			charMinSize = 30;
-			charMaxSize = 180;
-		} else if(m.rows() > 2500 || m.cols() > 2500) {//300dpi
-			dpiType = DPI_300;
-			charMinSize = 15;
-			charMaxSize = 90;
-		} else {//<300dpi
-			dpiType = DPI_LESS_300;
-			charMinSize = 10;
-			charMaxSize = 70;
-		}
-		
-		ArrayList<BufferedImage> imageList = new ArrayList<BufferedImage>(0);
+		ArrayList<BufferedImage> imageList = new ArrayList<BufferedImage>();
 		for(int i = 0, len = rectList.size(); i < len; i++) {
 			RectModel rectModel = rectList.get(i);
 			double w = rectModel.getWidth();
 			double h = rectModel.getHeight();
 			Point pts[] = new Point[4];
-			rectModel.getRotatedRect().points(pts);
+			getRotatedRect(rectModel).points(pts);
+//			rectModel.getRotatedRect().points(pts);
 			Mat result = new Mat();
 		    MatOfPoint2f src = new MatOfPoint2f();
 		    src.fromArray(pts[0],pts[1],pts[2]);
@@ -254,10 +255,46 @@ public class CutImageForLib {
 			imageList.add(image);
 			result.release();
 		}
-
+//		saveImage(imageList);
 		return imageList;
 	}
 	
+	
+	/**
+	 * Calculate the coordinate of the diagonal point
+	 * @param RectModel
+	 * @return RotatedRect
+	 */
+	public RotatedRect getRotatedRect(RectModel model){
+		double x = model.getX();
+		double y = model.getY();
+		double w = model.getWidth();
+		double h = model.getHeight();
+		double angle = model.getRotation();
+		double sin = Math.sin(Math.PI*(angle/180));
+		double cos = Math.cos(Math.PI*(angle/180));
+		double xCenter = x + (w*cos-h*sin)*0.5;
+		double yCenter = y + (h*cos +w*sin)*0.5;
+		Point center = new Point(xCenter, yCenter);
+		Size size = new Size(w, h);
+		return new RotatedRect(center, size, angle);
+		
+	}
+//	public  static void saveImage(List<BufferedImage> images){
+//		try{
+//			int i = 1; 
+//			for(BufferedImage image : images){
+//				String fileName = String.format("%d.jpg", i++);
+//				File file = new File("/home/csc/data/ocr/",fileName);
+//				if(!file.exists()){
+//					file.createNewFile();
+//				}
+//				ImageIO.write(image, "jpg", file);
+//			}	
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
+		
 	public boolean rotateImages(ArrayList<RotateImageModel> imageList) {
 		if(imageList.size() == 0) {
 			return false;
