@@ -57,7 +57,6 @@ public class OpenCVLib {
 			rect.points(pts);
 			model.setX(pts[1].x);
 			model.setY(pts[1].y);
-			model.setRotatedRect(rect);
 			resultList.add(model);
 		}
 		return resultList;
