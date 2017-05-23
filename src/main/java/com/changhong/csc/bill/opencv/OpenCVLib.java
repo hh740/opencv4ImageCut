@@ -19,8 +19,6 @@ public class OpenCVLib {
 	private CutImageForLib cutLib = new CutImageForLib();
 	private Mat image;
 	
-	public OpenCVLib() {}
-	
 	static {
 		String loadContent = LINUX;
 		String osName = System.getProperty(OS_NAME);
