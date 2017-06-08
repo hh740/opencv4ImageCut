@@ -1,6 +1,5 @@
 package com.changhong.csc.bill.opencv;
 
-import org.opencv.core.RotatedRect;
 
 public class RectModel {
 	private double x = 0d;

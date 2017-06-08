@@ -1,5 +1,7 @@
 package com.changhong.csc.bill.opencv;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -8,7 +10,6 @@ import java.util.ArrayList;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
-import org.opencv.imgcodecs.Imgcodecs;
 
 public class OpenCVLib {
 	
@@ -81,6 +82,9 @@ public class OpenCVLib {
 //			images.add((BufferedImage) ImageUtil.toBufferedImage(image));
 //			return images;
 //		}
+//		int x = 380;
+//		int y = 900;
+//		System.out.println("切图前坐标（" + x +","+ y + "）rgb 值：" + image.get(x, y)[0] + " "+ image.get(x, y)[1] + " " + image.get(x, y)[2]);
 		return cutLib.cutImages(image.clone(), rectList);
 	}
 	
@@ -101,12 +105,20 @@ public class OpenCVLib {
 		return cutLib.edgeDetect(image.clone());
 	}
 	
-	private void loadImage(String inputStr) {
+	private void loadImage(String inputStr){
 		if(!inputStr.equals("") && !inputStr.equals(null)) {
 			if(inputStr.startsWith("http") || inputStr.startsWith("https")) {
 				image = loadRemoteImage(inputStr);
 			} else {
-				image = Imgcodecs.imread(inputStr);
+//				image = Imgcodecs.imread(inputStr);
+				try{
+					InputStream is = new FileInputStream(new File(inputStr));
+					image = ImageUtil.toMat(is);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			
+				
 			}
 		}
 	}
