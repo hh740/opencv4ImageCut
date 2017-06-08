@@ -3,19 +3,20 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class ImageUtil {
@@ -144,79 +145,90 @@ public class ImageUtil {
 		if (m.channels() > 1) {
 			type = BufferedImage.TYPE_3BYTE_BGR;
 		}
-		int bufferSize = m.channels() * m.cols() * m.rows();
-		byte[] b = new byte[bufferSize];
-		m.get(0, 0, b); // get all the pixels
 		BufferedImage image = new BufferedImage(m.cols(), m.rows(), type);
-		final byte[] targetPixels = ((DataBufferByte) image.getRaster()
-				.getDataBuffer()).getData();
-		System.arraycopy(b, 0, targetPixels, 0, b.length);
-
+		DataBufferByte dataBuffer = (DataBufferByte)image.getRaster().getDataBuffer();
+		byte[] data = dataBuffer.getData();
+		m.get(0, 0, data);
 		return image;
 	}
 	
-	public static Mat toMat(InputStream is) {
-	    ByteArrayOutputStream os = null;
-	    Mat imageMat = null;
-		try {
-		    os = new ByteArrayOutputStream(is.available());
-		    byte[] buffer = new byte[1024];
-		    int bytesRead;
-		    while ((bytesRead = is.read(buffer)) != -1) {
-		        os.write(buffer, 0, bytesRead);
-		    }
-
-		    imageMat = new Mat(1, os.size(), CvType.CV_8U);
-		    imageMat.put(0, 0, os.toByteArray());
-		    Mat decoded = Imgcodecs.imdecode(imageMat, Imgcodecs.IMREAD_COLOR);
-		    return decoded;
-		    
-//			byte[] targetPixels = ((DataBufferByte) image.getRaster()
-//					.getDataBuffer()).getData();
-//			Mat m;
-//			int type = image.getType();
-//			if(type == BufferedImage.TYPE_BYTE_GRAY) {
-//				m = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC1);
-//			} else if(type == BufferedImage.TYPE_3BYTE_BGR) {
-//				m = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-//			} else if(type == BufferedImage.TYPE_4BYTE_ABGR) {
-//				m = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-//				//提取rgb通道数据，丢弃alpha通道数据，因为opencv有些接口只支持rgb3通道图像
-//				int bufferSize = 3 * m.cols() * m.rows();
-//				byte[] b = new byte[bufferSize];
-//				for(int i = 0, j = 0, n = 0, len = targetPixels.length; i < len; i++) {
-//					n = i % 4;
-//					if(n != 0) {
-//						b[j] = targetPixels[i];
-//						j++;
-//					}
-//				}
-//				targetPixels = b;
-//			} else {
-//				m = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-//			}
-//			m.put(0, 0, targetPixels); // put all the pixels to mat
-//			return m;
-		} catch (Exception e) {
+//	public static Mat toMat(InputStream is) {
+//	    ByteArrayOutputStream os = null;
+//	    Mat imageMat = null;
+//		try {
+//		    os = new ByteArrayOutputStream(is.available());
+//		    byte[] buffer = new byte[1024];
+//		    int bytesRead;
+//		    while ((bytesRead = is.read(buffer)) != -1) {
+//		        os.write(buffer, 0, bytesRead);
+//		    }
+//
+//		    imageMat = new Mat(1, os.size(), CvType.CV_8U);
+//		    imageMat.put(0, 0, os.toByteArray());
+//		    Mat decoded = Imgcodecs.imdecode(imageMat, Imgcodecs.IMREAD_COLOR);
+//		    return decoded;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//		    try {
+//		        if(is != null) {
+//	                is.close();
+//	            }
+//	            if(os != null) {
+//	                os.close();
+//	            }
+//	            if(imageMat != null) {
+//	                imageMat.release();
+//	            }
+//		    } catch (Exception e) {
+//	            e.printStackTrace();
+//	        } 
+//		}
+//		return null;
+//	}
+	public static Mat toMat(InputStream is){
+		Mat result = new Mat();
+		try{
+			BufferedImage bi = ImageIO.read(is);
+//			final ImageInfo imageInfo = Imaging.getImageInfo(IOUtils.toByteArray(is));
+//			String format = imageInfo.getFormatName();
+//			final ImageReader reader = ImageIO.getImageReadersByFormatName("jpg").next();
+//			ImageInputStream iis = ImageIO.createImageInputStream(is);
+//			reader.setInput(iis);
+//			BufferedImage bi = reader.read(0);
+//			is.close();
+//			System.out.println("图片格式为：" + format);
+//			int x = 900;
+//			int y = 380;
+//			Color co = new Color(bi.getRGB(x, y));
+//			System.out.println("转化为mat前的 rgb值：" + co.getBlue()  + " " + co.getGreen()   + " " + co.getRed() );
+			return ImageUtil.img2Mat(bi);
+		}catch(IOException e){
 			e.printStackTrace();
-		} finally {
-		    try {
-		        if(is != null) {
-	                is.close();
-	            }
-	            if(os != null) {
-	                os.close();
-	            }
-	            if(imageMat != null) {
-	                imageMat.release();
-	            }
-		    } catch (Exception e) {
-	            e.printStackTrace();
-	        } 
 		}
-		return null;
+//		catch(ImageReadException e){
+//			e.printStackTrace();
+//		}
+		return result;
+		
 	}
-	
+	public static Mat img2Mat(BufferedImage in)
+    {
+          Mat out;      
+          int cols = in.getWidth();
+    	  int rows = in.getHeight();
+          if(in.getType() == BufferedImage.TYPE_3BYTE_BGR)
+          {
+              out = new Mat(rows, cols, CvType.CV_8UC3);              
+          }
+          else
+          {
+              out = new Mat(rows, cols, CvType.CV_8UC1);             
+           }
+          byte[] pixels = ((DataBufferByte) in.getRaster().getDataBuffer()).getData();
+          out.put(0, 0, pixels);
+          return out;
+     } 
 	public static Mat sobel(Mat src_gray) {
 		Imgproc.medianBlur(src_gray, src_gray, 5);
 		// ///////////////////////// Sobe l////////////////////////////////////
