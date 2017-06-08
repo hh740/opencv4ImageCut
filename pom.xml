@@ -4,7 +4,10 @@
 	<groupId>com.changhong.csc</groupId>
 	<artifactId>opencv-util</artifactId>
 	<version>2.4.0.RELEASE</version>
-	<description>2.4.0版本在2.3.0版本基础之上，优化了切图部分代码（只使用一个放射变换实现），边缘检测部分优化对于单个票据的处理</description>
+	<description>
+	2.4.0版本在2.3.0版本基础之上，优化了切图部分代码（只使用一个放射变换实现），边缘检测部分优化对于单个票据的处理
+	2017-6-8：修复大的负角度切图后，图片偏转90度的问题
+	</description>
 	<properties>
 		<java.version>1.7</java.version>
 	</properties>
