@@ -5,8 +5,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -113,10 +111,15 @@ public class CutImageForLib {
 			
 			Rect r = Imgproc.boundingRect(points);								//获取外部矩形边界
 			double area = Imgproc.contourArea(points);							//计算轮廓矩面积。
-			if(area < m.size().height * m.size().width*0.05)		//火车票（目前最小票据）大概占据A4纸的0.08左右，所以将阈值设为0.05，过滤点大部分无关轮廓
+			if(area < m.size().height * m.size().width*0.05)		//火车票（目前最小票据）大概占据A4纸的0.08左右，所以将阈值设为0.05，过滤掉大部分无关轮廓
 				continue;
 //			if (area < 100 || r.width < m.size().width * 0.1 || r.height < m.size().height * 0.1)
 //				continue;
+//			//鉴于实际业务基本都是单张票据，所以当轮廓面积大于整张单据50%时，可认为此时为单张票据
+//			if(area > m.size().height * m.size().width*0.5){
+//				resultContours.clear();
+//				break;
+//			}
 			if (r.width > m.size().width * 0.8 && r.height > m.size().height * 0.8)
 				continue;
 			
@@ -232,15 +235,33 @@ public class CutImageForLib {
 //			rectModel.getRotatedRect().points(pts);
 			Mat result = new Mat();
 		    MatOfPoint2f src = new MatOfPoint2f();
-		    src.fromArray(pts[0],pts[1],pts[2]);
 		    MatOfPoint2f tgt=new MatOfPoint2f();
-		    tgt.fromArray(new Point(0,h),new Point(0,0),new Point(w,0));
+		    /**
+			 * 矫正错误角度，业务中大部分票据偏转角度不会太大
+			 * 如偏转角度过大，则opencv所得角度需要进行人工矫正
+			 */
+			if(Math.abs(rectModel.getRotation()) > 50 && rectModel.getRotation() <0 ){
+//			if(rectModel.getRotation() <0 ){
+				src.fromArray(pts[1],pts[2],pts[3]);
+				double temp = w;
+				w = h;
+				h = temp;
+			}else{
+				src.fromArray(pts[0],pts[1],pts[2]);
+				
+			}		
+			tgt.fromArray(new Point(0,h),new Point(0,0),new Point(w,0));
 		    // get the AffineTransform Matrix
 		    Mat rotImage = Imgproc.getAffineTransform(src, tgt);
-		    Imgproc.warpAffine(m, result, rotImage, new Size(w , h), 
-		    		Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS, 0, new Scalar(255, 255, 255));
-
+		    Imgproc.warpAffine(m, result, rotImage, new Size(w , h));
+//		    Imgproc.warpAffine(m, result, rotImage, new Size(w , h), 
+//		    		Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS, 0, new Scalar(255, 255, 255));
+//		    int x = 380;
+//		    int y = 900;
+//		    System.out.println("切图后 坐标（"+ x + "," + y + "）rgb 值：" + result.get(x, y)[0] + " " + result.get(x, y)[1] + " " + result.get(x, y)[2]);
 			BufferedImage image = (BufferedImage) ImageUtil.toBufferedImage(result);	
+//			Color co = new Color(image.getRGB(y, x));
+//			System.out.println("转化为bufferedImage后的 rgb值：" + co.getBlue()  + " " + co.getGreen()   + " " + co.getRed() );
 			// save the image
 //			name = "temp2.jpg";
 //			File file2 = new File(path,name);
